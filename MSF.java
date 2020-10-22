@@ -16,18 +16,17 @@ public class MSF{
     int maxQueries = scanner.nextInt();
 
     // Allocate array for all nodes
-    int nodes[][] = new int[N][];
+    int matrix[][] = new int[N][N];
 
     // Query edges from given node.
     int edges[] = getNode(4);
-   
-
 
 
   }
 
 
   public static int[] getNode(int node){
+
     System.out.println(node);
 
     // Read the answer
@@ -38,6 +37,9 @@ public class MSF{
     final int[] ints = Arrays.stream(line.split(" "))
         .mapToInt(Integer::parseInt)
         .toArray();
+
+    :TODO
+    // Fill matrix with values from request
 
     return ints;
 
