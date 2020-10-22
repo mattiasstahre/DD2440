@@ -4,19 +4,24 @@ import java.util.Scanner;
 
 public class MSF{
 
+  int N;
+  int maxWeight;
+  int maxQueries;
 
+  // Allocate array for all nodes
+  int matrix[][];
 
   
   public static void main(String arg[]){
 
 
-    Scanner scanner = new Scanner(System.in);
-    int N = scanner.nextInt();
-    int maxWeight = scanner.nextInt();
-    int maxQueries = scanner.nextInt();
+    scanner = new Scanner(System.in);
+    N = scanner.nextInt();
+    maxWeight = scanner.nextInt();
+    maxQueries = scanner.nextInt();
 
     // Allocate array for all nodes
-    int matrix[][] = new int[N][N];
+    matrix = new int[N][N];
 
     // Query edges from given node.
     int edges[] = getNode(4);
@@ -25,7 +30,7 @@ public class MSF{
   }
 
 
-  public static int[] getNode(int node){
+  public static void getNode(int node){
 
     System.out.println(node);
 
@@ -34,14 +39,21 @@ public class MSF{
     String line = scanner.nextLine();
     
     // Parse the answer into an array and return it.
-    final int[] ints = Arrays.stream(line.split(" "))
+    final int[] edges = Arrays.stream(line.split(" "))
         .mapToInt(Integer::parseInt)
         .toArray();
 
-    :TODO
+    
     // Fill matrix with values from request
+    // Example: getNode(7) => 3 1 3 6 2 3 1
 
-    return ints;
+    // Read all edges and put their weight in matrix at corresponding place.
+    for(int i = 1; i < edges.length; i++){
+        matrix[node][edges[i] = edges[i+1];
+    }
+
+
+
 
   }
 
