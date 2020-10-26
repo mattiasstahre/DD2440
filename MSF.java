@@ -1,28 +1,36 @@
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.*;
-
+import java.lang.Math;
 
 public class MSF {
-
   public static int numberOfNodes;
   public static int maxWeight;
   public static int maxQueries;
   public static LinkedList<Integer> visitedNodes = new LinkedList<Integer>();
+  public static Kattio io = new Kattio(System.in, System.out);
 
   // Allocate array for all nodes
   public static int matrix[][];
 
   public static void main(String arg[]) {
-
-    Scanner scanner = new Scanner(System.in);
-    numberOfNodes = scanner.nextInt();
-    maxWeight = scanner.nextInt();
-    maxQueries = scanner.nextInt();
+    numberOfNodes = io.getInt();
+    maxWeight = io.getInt();
+    maxQueries = io.getInt();
 
     initialize();
-    nextRequest();
-    print2D(matrix);
+
+    double epsillon = 0.5;
+    double delta = 0.5;
+    int F = maxWeight;
+    int d = 0; // degree?
+
+    double approximation = mstApporoximation(matrix, epsillon, delta, F, d);
+    //nextRequest();
+    //print2D(matrix);
+
+    io.println("end " + approximation);
+    io.close();
   }
 
   // Does some preparation
@@ -40,27 +48,68 @@ public class MSF {
 
   // Dumb function that get next request.
   public static void nextRequest() {
-
     for (int i = 0; i < maxQueries; i++) {
       randomRequest();
-
     }
 
-    outputApproximation(approximation);
+   // outputApproximation(approximation);
   }
 
-  public static int getComponents() {
+  public static double approximationComponents(int[][] subgraph, double epsillon, double delta)
+  {
+    int k = (int)(1 / (epsillon * epsillon) * Math.log(1 / delta));
+    LinkedList<Integer> nonPickedVertices = new LinkedList<Integer>();
+    int[] pickedVertices = new int[k];
+    Random random = new Random();
+    int m;
+    double sum = 0.0;
 
+    for(int i = 0; i < numberOfNodes; i++)
+      nonPickedVertices.add(i);
+
+    int randomIndex;
+    for(int i = 0; i < k; i++)
+    {
+      randomIndex = random.nextInt(nonPickedVertices.size());
+      pickedVertices[i] = nonPickedVertices.get(randomIndex);
+      nonPickedVertices.remove(randomIndex);
+    }
+
+    for(int i = 0; i < k; i++)
+    {
+      m = breadthFirstSearch(subgraph, pickedVertices[i]);
+
+      // Calculate "m with tilde on top"
+      if (m < (2 / epsillon))
+        sum += 1 / m;
+      else
+        sum += 1 / (2 / epsillon);
+    }
+
+    sum *= numberOfNodes / k;
+
+    return sum;
   }
 
-  public static double getAverageWeight() {
-    
+  public static double mstApporoximation(int[][] nodes, double epsillon, double delta, int F, int d)
+  {
+    double componentSum = 0.0;
+    int[][] subgraph;
+    for(int i = 1; i < F; i++)
+    {
+      subgraph = getSubgraph(i);
+      componentSum += approximationComponents(subgraph, epsillon / (2 * F), delta / F);
+    }
+
+    double approximation = numberOfNodes - F + componentSum;
+
+    return approximation;
   }
 
-  public static int[][] getMSF() {
-
+  public static int[][] getSubgraph(int maxEdgeWeight)
+  {
+    return null;
   }
-
 
   // Does a request to a random node which has not yet been visited.
   public static void randomRequest() {
@@ -100,7 +149,6 @@ public class MSF {
     for (int i = 1; i < edges.length; i = i + 2) {
       matrix[node][edges[i]] = edges[i + 1];
     }
-
   }
 
   // Simple function to print 2D arrays, input is matrix.
@@ -111,5 +159,27 @@ public class MSF {
       // converting each row as string
       // and then printing in a separate line
       System.out.println(Arrays.toString(row));
+  }
+
+  // Taken from https://www.sanfoundry.com/java-program-traverse-graph-using-bfs/
+  public static int breadthFirstSearch(int[][] matrix, int source) {
+      boolean[] visited = new boolean[matrix.length];
+      visited[source] = true;
+      Queue<Integer> queue = new LinkedList<>();
+      queue.add(source);
+      int counter = 0;
+      while(!queue.isEmpty()) {
+          int x = queue.poll();
+          counter++;
+          int i;
+          for(i=0; i<matrix.length;i++){
+            if(matrix[x-1][i] > 0 && visited[i] == false){
+              queue.add(i+1);
+              visited[i] = true;
+            }
+          }
+      }
+
+      return counter;
   }
 }
