@@ -26,7 +26,7 @@ public class MSF {
     int d = 0; // degree?
 
     double approximation = mstApporoximation(matrix, epsillon, delta, F, d);
-    //nextRequest();
+    nextRequest();
     //print2D(matrix);
 
     io.println("end " + approximation);
@@ -108,8 +108,19 @@ public class MSF {
 
   public static int[][] getSubgraph(int maxEdgeWeight)
   {
-    return null;
-  }
+
+
+    int [][]subgraph = new int[numberOfNodes][numberOfNodes];
+    // Get matrix that consists of all weights up to and including maxEdgeWeight
+    for(int i = 0; i < numberOfNodes; i++){
+      for(int k = 0; k < numberOfNodes; k++){
+        if(matrix[i][k] <= maxEdgeWeight) {
+          subgraph[i][k] = matrix[i][k];   
+        }
+      }
+    }
+    return subgraph;
+}
 
   // Does a request to a random node which has not yet been visited.
   public static void randomRequest() {
