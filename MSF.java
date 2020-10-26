@@ -20,13 +20,16 @@ public class MSF {
 
     initialize();
 
-    double epsillon = 0.5;
+    double epsillon = 0.1;
     double delta = 0.5;
     int F = maxWeight;
     int d = 0; // degree?
 
-    double approximation = mstApporoximation(matrix, epsillon, delta, F, d);
+
     nextRequest();
+
+    double approximation = mstApporoximation(matrix, epsillon, delta, F, d);
+    
     //print2D(matrix);
 
     io.println("end " + approximation);
@@ -57,7 +60,8 @@ public class MSF {
 
   public static double approximationComponents(int[][] subgraph, double epsillon, double delta)
   {
-    int k = (int)(1 / (epsillon * epsillon) * Math.log(1 / delta));
+    int k = maxQueries;//(int)(1 / (epsillon * epsillon) * Math.log(1 / delta));
+    // System.out.println("K equals " + k);
     LinkedList<Integer> nonPickedVertices = new LinkedList<Integer>();
     int[] pickedVertices = new int[k];
     Random random = new Random();
@@ -70,6 +74,7 @@ public class MSF {
     int randomIndex;
     for(int i = 0; i < k; i++)
     {
+      // System.out.println("Random Int " + nonPickedVertices.size());
       randomIndex = random.nextInt(nonPickedVertices.size());
       pickedVertices[i] = nonPickedVertices.get(randomIndex);
       nonPickedVertices.remove(randomIndex);
@@ -135,7 +140,7 @@ public class MSF {
     // Store visited nodes in linkedList
     visitedNodes.remove(random);
 
-    System.out.println("getNode " + nextValue);
+    //System.out.println("getNode " + nextValue);
 
     // Request node found in visitedNodes
     getNode(nextValue);
@@ -184,7 +189,7 @@ public class MSF {
           counter++;
           int i;
           for(i=0; i<matrix.length;i++){
-            if(matrix[x-1][i] > 0 && visited[i] == false){
+            if(matrix[x][i] > 0 && visited[i] == false){
               queue.add(i+1);
               visited[i] = true;
             }
