@@ -60,7 +60,7 @@ public class MSF {
     int k = (int)(1 / (epsillon * epsillon) * Math.log(1 / delta));
     LinkedList<Integer> nonPickedVertices = new LinkedList<Integer>();
     int[] pickedVertices = new int[k];
-    Random random = new Random();
+    Random random = new Random(0);
     int m;
     double sum = 0.0;
 
@@ -125,7 +125,7 @@ public class MSF {
   // Does a request to a random node which has not yet been visited.
   public static void randomRequest() {
 
-    Random rand = new Random();
+    Random rand = new Random(0);
 
     // Get current size of visitedNodes
     int random = rand.nextInt(visitedNodes.size());
