@@ -39,10 +39,10 @@ public class MSF {
         
         final int[] edges = Arrays.stream(line.split(" ")).mapToInt(Integer::parseInt).toArray();
         matrix[edges[0]][edges[1]] = edges[2];
+        System.out.println("This is the read values " + edges[0] + edges[1] + edges[2]);
       }
 
     } else {
-      System.out.println("hej");
       nextRequest();
     }
     double approximation = mstApporoximation(matrix, epsillon, delta, F, d);
@@ -201,6 +201,7 @@ public class MSF {
       counter++;
       int i;
       for (i = 0; i < matrix.length; i++) {
+        //System.out.println("x and i " + x + i);
         if (matrix[x][i] > 0 && visited[i] == false) {
           queue.add(i + 1);
           visited[i] = true;
