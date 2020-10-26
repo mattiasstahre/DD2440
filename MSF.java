@@ -30,16 +30,16 @@ public class MSF {
     if (args.length > 0) {
       System.out.println("Running Test");
       
-      while(io.hasMoreTokens() == true){
-        Scanner scanner = new Scanner(System.in);
-        String line = scanner.nextLine();
-        
+      while(io.hasMoreTokens() == true){        
         // break free
-        if(line.equals("end")) break;
-        
-        final int[] edges = Arrays.stream(line.split(" ")).mapToInt(Integer::parseInt).toArray();
-        matrix[edges[0]][edges[1]] = edges[2];
-        System.out.println("This is the read values " + edges[0] + edges[1] + edges[2]);
+        //if(line.equals("end")) break;
+
+        int from = io.getInt();
+        int to = io.getInt();
+        int weight = io.getInt();
+
+        matrix[from][to] = weight;
+        matrix[to][from] = weight;
       }
 
     } else {
@@ -159,23 +159,22 @@ public class MSF {
   }
 
   // gets edges from requested node.
-  public static void getNode(int node) {
-
-    System.out.println(node);
-
+  public static void getNode(int originNode) {
     // Read the answer
-    Scanner scanner = new Scanner(System.in);
-    String line = scanner.nextLine();
-
-    // Parse the answer into an array and return it.
-    final int[] edges = Arrays.stream(line.split(" ")).mapToInt(Integer::parseInt).toArray();
 
     // Fill matrix with values from request
     // Example: getNode(7) => 3 1 3 6 2 3 1
 
-    // Read all edges and put their weight in matrix at corresponding place.
-    for (int i = 1; i < edges.length; i = i + 2) {
-      matrix[node][edges[i]] = edges[i + 1];
+    int numberOfEdges = io.getInt();
+
+    int to, weight;
+    for(int i = 0; i < numberOfEdges; i++)
+    {
+      to = io.getInt();
+      weight = io.getInt();
+
+      matrix[originNode][to] = weight;
+      matrix[to][originNode] = weight;
     }
   }
 
