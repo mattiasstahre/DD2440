@@ -13,10 +13,11 @@ public class MSF {
   // Allocate array for all nodes
   public static int matrix[][];
 
-  public static void main(String arg[]) {
+  public static void main(String args[]) {
+
     numberOfNodes = io.getInt();
     maxWeight = io.getInt();
-    maxQueries = io.getInt();
+    maxQueries = io.getInt(); 
 
     initialize();
 
@@ -25,15 +26,32 @@ public class MSF {
     int F = maxWeight;
     int d = 0; // degree?
 
+    // For a test replace nextRequest!
+    if (args.length > 0) {
+      System.out.println("Running Test");
+      
+      while(io.hasMoreTokens() == true){
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+        
+        // break free
+        if(line.equals("end")) break;
+        
+        final int[] edges = Arrays.stream(line.split(" ")).mapToInt(Integer::parseInt).toArray();
+        matrix[edges[0]][edges[1]] = edges[2];
+      }
 
-    nextRequest();
-
+    } else {
+      System.out.println("hej");
+      nextRequest();
+    }
     double approximation = mstApporoximation(matrix, epsillon, delta, F, d);
-    
-    //print2D(matrix);
+
+    // print2D(matrix);
 
     io.println("end " + approximation);
     io.close();
+
   }
 
   // Does some preparation
@@ -43,9 +61,10 @@ public class MSF {
 
     // Prepare linkedList by putting all nodes in it. Will remove one for each
     // request later on.
-
     for (int i = 0; i < numberOfNodes; i++) {
       visitedNodes.add(i);
+
+
     }
   }
 
@@ -55,12 +74,11 @@ public class MSF {
       randomRequest();
     }
 
-   // outputApproximation(approximation);
+    // outputApproximation(approximation);
   }
 
-  public static double approximationComponents(int[][] subgraph, double epsillon, double delta)
-  {
-    int k = maxQueries;//(int)(1 / (epsillon * epsillon) * Math.log(1 / delta));
+  public static double approximationComponents(int[][] subgraph, double epsillon, double delta) {
+    int k = maxQueries;// (int)(1 / (epsillon * epsillon) * Math.log(1 / delta));
     // System.out.println("K equals " + k);
     LinkedList<Integer> nonPickedVertices = new LinkedList<Integer>();
     int[] pickedVertices = new int[k];
@@ -68,20 +86,18 @@ public class MSF {
     int m;
     double sum = 0.0;
 
-    for(int i = 0; i < numberOfNodes; i++)
+    for (int i = 0; i < numberOfNodes; i++)
       nonPickedVertices.add(i);
 
     int randomIndex;
-    for(int i = 0; i < k; i++)
-    {
+    for (int i = 0; i < k; i++) {
       // System.out.println("Random Int " + nonPickedVertices.size());
       randomIndex = random.nextInt(nonPickedVertices.size());
       pickedVertices[i] = nonPickedVertices.get(randomIndex);
       nonPickedVertices.remove(randomIndex);
     }
 
-    for(int i = 0; i < k; i++)
-    {
+    for (int i = 0; i < k; i++) {
       m = breadthFirstSearch(subgraph, pickedVertices[i]);
 
       // Calculate "m with tilde on top"
@@ -96,12 +112,10 @@ public class MSF {
     return sum;
   }
 
-  public static double mstApporoximation(int[][] nodes, double epsillon, double delta, int F, int d)
-  {
+  public static double mstApporoximation(int[][] nodes, double epsillon, double delta, int F, int d) {
     double componentSum = 0.0;
     int[][] subgraph;
-    for(int i = 1; i < F; i++)
-    {
+    for (int i = 1; i < F; i++) {
       subgraph = getSubgraph(i);
       componentSum += approximationComponents(subgraph, epsillon / (2 * F), delta / F);
     }
@@ -111,21 +125,19 @@ public class MSF {
     return approximation;
   }
 
-  public static int[][] getSubgraph(int maxEdgeWeight)
-  {
+  public static int[][] getSubgraph(int maxEdgeWeight) {
 
-
-    int [][]subgraph = new int[numberOfNodes][numberOfNodes];
+    int[][] subgraph = new int[numberOfNodes][numberOfNodes];
     // Get matrix that consists of all weights up to and including maxEdgeWeight
-    for(int i = 0; i < numberOfNodes; i++){
-      for(int k = 0; k < numberOfNodes; k++){
-        if(matrix[i][k] <= maxEdgeWeight) {
-          subgraph[i][k] = matrix[i][k];   
+    for (int i = 0; i < numberOfNodes; i++) {
+      for (int k = 0; k < numberOfNodes; k++) {
+        if (matrix[i][k] <= maxEdgeWeight) {
+          subgraph[i][k] = matrix[i][k];
         }
       }
     }
     return subgraph;
-}
+  }
 
   // Does a request to a random node which has not yet been visited.
   public static void randomRequest() {
@@ -140,7 +152,7 @@ public class MSF {
     // Store visited nodes in linkedList
     visitedNodes.remove(random);
 
-    //System.out.println("getNode " + nextValue);
+    // System.out.println("getNode " + nextValue);
 
     // Request node found in visitedNodes
     getNode(nextValue);
@@ -179,23 +191,23 @@ public class MSF {
 
   // Taken from https://www.sanfoundry.com/java-program-traverse-graph-using-bfs/
   public static int breadthFirstSearch(int[][] matrix, int source) {
-      boolean[] visited = new boolean[matrix.length];
-      visited[source] = true;
-      Queue<Integer> queue = new LinkedList<>();
-      queue.add(source);
-      int counter = 0;
-      while(!queue.isEmpty()) {
-          int x = queue.poll();
-          counter++;
-          int i;
-          for(i=0; i<matrix.length;i++){
-            if(matrix[x][i] > 0 && visited[i] == false){
-              queue.add(i+1);
-              visited[i] = true;
-            }
-          }
+    boolean[] visited = new boolean[matrix.length];
+    visited[source] = true;
+    Queue<Integer> queue = new LinkedList<>();
+    queue.add(source);
+    int counter = 0;
+    while (!queue.isEmpty()) {
+      int x = queue.poll();
+      counter++;
+      int i;
+      for (i = 0; i < matrix.length; i++) {
+        if (matrix[x][i] > 0 && visited[i] == false) {
+          queue.add(i + 1);
+          visited[i] = true;
+        }
       }
+    }
 
-      return counter;
+    return counter;
   }
 }
