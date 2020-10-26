@@ -136,6 +136,7 @@ public class MSF {
         }
       }
     }
+
     return subgraph;
   }
 
@@ -149,12 +150,14 @@ public class MSF {
     // Read value at random position in visitedNodes
     int nextValue = visitedNodes.get(random);
 
+
     // Store visited nodes in linkedList
     visitedNodes.remove(random);
 
     // System.out.println("getNode " + nextValue);
 
     // Request node found in visitedNodes
+    // System.out.println("FROM NODE: " + nextValue);
     getNode(nextValue);
   }
 
@@ -172,9 +175,12 @@ public class MSF {
     {
       to = io.getInt();
       weight = io.getInt();
-
+      //System.out.println("TO: " + to);
+      //System.out.println("MATRIX DIM: " + matrix.length + "x" + matrix[0].length);
       matrix[originNode][to] = weight;
       matrix[to][originNode] = weight;
+
+      //print2D(matrix);
     }
   }
 
@@ -202,7 +208,7 @@ public class MSF {
       for (i = 0; i < matrix.length; i++) {
         //System.out.println("x and i " + x + i);
         if (matrix[x][i] > 0 && visited[i] == false) {
-          queue.add(i + 1);
+          queue.add(i);
           visited[i] = true;
         }
       }
