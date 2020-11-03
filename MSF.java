@@ -13,7 +13,7 @@ public class MSF {
     numberOfNodes = io.getInt();
     maxWeight = io.getInt();
     maxQueries = io.getInt(); 
-    //maxQueries = 0;
+    maxQueries = 10;
 
     initialize();
 
@@ -82,25 +82,27 @@ public class MSF {
     int k = maxQueries;// (int)(1 / (epsillon * epsillon) * Math.log(1 / delta));
 
     // System.out.println("K equals " + k);
-    LinkedList<Integer> nonPickedVertices = new LinkedList<Integer>();
+    //LinkedList<Integer> nonPickedVertices = new LinkedList<Integer>();
     int[] pickedVertices = new int[k];
     Random random = new Random(0);
     int m;
     double sum = 0.0;
 
-    for (int i = 0; i < numberOfNodes; i++)
-      nonPickedVertices.add(i);
+    //for (int i = 0; i < numberOfNodes; i++)
+    //  nonPickedVertices.add(i);
 
-    int randomIndex;
-    for (int i = 0; i < k; i++) {
+   // int randomIndex;
+   // for (int i = 0; i < k; i++) {
       // System.out.println("Random Int " + nonPickedVertices.size());
-      randomIndex = random.nextInt(nonPickedVertices.size());
-      pickedVertices[i] = nonPickedVertices.get(randomIndex);
-      nonPickedVertices.remove(randomIndex);
-    }
+     // randomIndex = random.nextInt(nonPickedVertices.size());
+      //randomIndex = random.nextInt(numberOfNodes);
+      //pickedVertices[i] = nonPickedVertices.get(randomIndex);
+      //nonPickedVertices.remove(randomIndex);
+    //}
 
     for (int i = 0; i < k; i++) {
-      m = breadthFirstSearch(subgraph, pickedVertices[i]);
+     // m = breadthFirstSearch(subgraph, pickedVertices[i]);
+      m = breadthFirstSearch(subgraph, random.nextInt(numberOfNodes));
 
       // Calculate "m with tilde on top"
       if (m < (2 / epsillon))
@@ -132,7 +134,7 @@ public class MSF {
     // Get matrix that consists of all weights up to and including maxEdgeWeight
     for (int i = 0; i < numberOfNodes; i++) {
       for (int k = 0; k < numberOfNodes; k++) {
-        if (getWeight(map,i,k)<= maxEdgeWeight) { 
+        if (getWeight(map,i,k)<= maxEdgeWeight && getWeight(map,i,k) != -1){ 
           int temp = getWeight(map,i,k);
           putNode(subMap, i, k, temp);
           putNode(subMap, k, i, temp);
@@ -219,7 +221,7 @@ public class MSF {
 
     int numberOfEdges = io.getInt();
 
-    visitedNodes.add(originNode);
+    // visitedNodes.add(originNode);
 
     int to, weight;
     for(int i = 0; i < numberOfEdges; i++)
