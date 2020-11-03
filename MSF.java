@@ -50,9 +50,6 @@ public class MSF {
     io.flush();
     
   }
-  
- 
-  
 
   // Does some preparation
   public static void initialize() {
@@ -132,12 +129,18 @@ public class MSF {
   public static HashMap<Integer, LinkedList<Pair>> getSubgraph(int maxEdgeWeight) {
     HashMap<Integer, LinkedList<Pair>> subMap = new HashMap<Integer, LinkedList<Pair>>();
     // Get matrix that consists of all weights up to and including maxEdgeWeight
-    for (int i = 0; i < numberOfNodes; i++) {
-      for (int k = 0; k < numberOfNodes; k++) {
-        if (getWeight(map,i,k)<= maxEdgeWeight && getWeight(map,i,k) != -1){ 
-          int temp = getWeight(map,i,k);
-          putNode(subMap, i, k, temp);
-          putNode(subMap, k, i, temp);
+    Iterator<Integer> iterator = map.keySet().iterator();
+    
+
+  while(iterator.hasNext()){
+    int sourceNode = iterator.next();
+    LinkedList<Pair> tempList = map.get(sourceNode);
+      for (Pair pair: tempList) {
+        int weight = pair.getValue();
+        if (weight<= maxEdgeWeight && weight != -1){ 
+          int dstNode = pair.getKey();
+          putNode(subMap, sourceNode, dstNode, weight);
+          putNode(subMap, dstNode, sourceNode, weight);
         }
       }
     }
@@ -224,8 +227,7 @@ public class MSF {
     // visitedNodes.add(originNode);
 
     int to, weight;
-    for(int i = 0; i < numberOfEdges; i++)
-    {
+    for(int i = 0; i < numberOfEdges; i++){
       to = io.getInt();
       weight = io.getInt();
       //System.out.println("TO: " + to);
@@ -252,21 +254,24 @@ public class MSF {
   }
 
   // Taken from https://www.sanfoundry.com/java-program-traverse-graph-using-bfs/
-  public static int breadthFirstSearch(HashMap<Integer, LinkedList<Pair>> graph, int source) {
-    boolean[] visited = new boolean[graph.size()];
-    visited[source] = true;
+  public static int breadthFirstSearch(HashMap<Integer, LinkedList<Pair>> subGraph, int source) {
+    //boolean[] visited = new boolean[subGraph.size()]; 
+    HashMap<Integer, Boolean> hasVisited = new HashMap<Integer, Boolean>();
+
+    hasVisited.put(source, true);
     Queue<Integer> queue = new LinkedList<Integer>();
     queue.add(source);
     int counter = 0;
     while (!queue.isEmpty()) {
-      int x = queue.poll();
+      int node = queue.poll();
       counter++;
-      int i;
-      for (i = 0; i < graph.size(); i++) {
-        //System.out.println("x and i " + x + i);
-        if (getWeight(graph,x,i) > 0 && visited[i] == false) {
-          queue.add(i);
-          visited[i] = true;
+      
+      LinkedList<Pair> edges = subGraph.get(node);
+      for (Pair pair : edges)
+      {
+        if (pair.getValue() > 0 && hasVisited.get(pair.getKey()) == false) {
+          queue.add(pair.getKey());
+          hasVisited.put(pair.getKey(), true);
         }
       }
     }
