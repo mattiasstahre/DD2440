@@ -132,8 +132,11 @@ public class MSF {
   public static HashMap<Integer, LinkedList<Pair>> getSubgraph(int maxEdgeWeight) {
     HashMap<Integer, LinkedList<Pair>> subMap = new HashMap<Integer, LinkedList<Pair>>();
     // Get matrix that consists of all weights up to and including maxEdgeWeight
-    for (int i = 0; i < numberOfNodes; i++) {
-      for (int k = 0; k < numberOfNodes; k++) {
+
+    Iterator iterator = map.keySet().iterator();
+    while(iterator.hasNext()) {
+      //plocka ut linked list
+      for (int k = 0; k < map.size(); k++) {
         if (getWeight(map,i,k)<= maxEdgeWeight && getWeight(map,i,k) != -1){ 
           int temp = getWeight(map,i,k);
           putNode(subMap, i, k, temp);
