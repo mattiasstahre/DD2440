@@ -13,23 +13,20 @@ public class MSF {
     numberOfNodes = io.getInt();
     maxWeight = io.getInt();
     maxQueries = io.getInt(); 
-    maxQueries = 10;
+    maxQueries = maxQueries;
 
     initialize();
 
     double epsillon = 0.1;
-    double delta = 0.5;
+    double delta = 0.1;
     int F = maxWeight;
-    int d = 0; // degree?
+    int d = 0; 
 
     // For a test replace nextRequest!
     if (args.length > 0) {
       System.out.println("Running Test");
       
       while(io.hasMoreTokens() == true){        
-        // break free
-        //if(line.equals("end")) break;
-
         int from = io.getInt();
         int to = io.getInt();
         int weight = io.getInt();
@@ -38,78 +35,59 @@ public class MSF {
         putNode(map, from, to, weight);
         putNode(map, to, from, weight);
       }
-
     } else {
       nextRequest();
     }
     double approximation = mstApporoximation(epsillon, delta, F, d);
-
-    // print2D(matrix);
-
     io.println("end " + approximation); 
     io.flush();
-    
   }
 
   // Does some preparation
   public static void initialize() {
-    // Allocate array for all nodes
-   map = new HashMap<Integer, LinkedList<Pair>>();
-
-    // Prepare linkedList by putting all nodes in it. Will remove one for each
-    // request later on.
-    /*for (int i = 0; i < numberOfNodes; i++) {
-      visitedNodes.add(i);
-
-
-    }*/
+    map = new HashMap<Integer, LinkedList<Pair>>();
   }
 
   // Dumb function that get next request.
   public static void nextRequest() {
+    Random rand = new Random();
     for (int i = 0; i < maxQueries; i++) {
       io.flush();
-      randomRequest();
+      randomRequest(rand);
     }
-
-    // outputApproximation(approximation);
   }
 
   public static double approximationComponents(HashMap<Integer, LinkedList<Pair>> subgraph, double epsillon, double delta) {
-    int k = maxQueries;// (int)(1 / (epsillon * epsillon) * Math.log(1 / delta));
+    int k =  160; //(int)((1 / (epsillon * epsillon)) * (Math.log(1 / delta)));
 
-    // System.out.println("K equals " + k);
-    //LinkedList<Integer> nonPickedVertices = new LinkedList<Integer>();
+    
     int[] pickedVertices = new int[k];
-    Random random = new Random(0);
-    int m;
+    Random random = new Random();
+    double m;
     double sum = 0.0;
 
-    //for (int i = 0; i < numberOfNodes; i++)
-    //  nonPickedVertices.add(i);
-
-   // int randomIndex;
-   // for (int i = 0; i < k; i++) {
-      // System.out.println("Random Int " + nonPickedVertices.size());
-     // randomIndex = random.nextInt(nonPickedVertices.size());
-      //randomIndex = random.nextInt(numberOfNodes);
-      //pickedVertices[i] = nonPickedVertices.get(randomIndex);
-      //nonPickedVertices.remove(randomIndex);
-    //}
-
     for (int i = 0; i < k; i++) {
-     // m = breadthFirstSearch(subgraph, pickedVertices[i]);
-      m = breadthFirstSearch(subgraph, random.nextInt(numberOfNodes));
+     Set<Integer> keySet = subgraph.keySet();
+     List<Integer> keyList = new ArrayList<>(keySet);
 
-      // Calculate "m with tilde on top"
-      if (m < (2 / epsillon))
-        sum += 1 / m;
-      else
-        sum += 1 / (2 / epsillon);
+     int size = keyList.size();
+     int randIdx = new Random().nextInt(size);
+
+     int randomPickedElement = keyList.get(randIdx);
+     m = breadthFirstSearch(subgraph, randomPickedElement);
+      
+    if (m < (2 / epsillon)){
+        double temp = (1 / m);
+        sum = sum + temp;
+        // sum = sum + (double)(1/m)
+    }
+      else{
+        double temp = (1 / (2 / epsillon));
+        sum = sum + temp; 
+      }
     }
 
-    sum *= numberOfNodes / k;
-
+    sum = sum * ((double)numberOfNodes / (double)k);
     return sum;
   }
 
@@ -118,7 +96,9 @@ public class MSF {
     HashMap<Integer, LinkedList<Pair>> subMap;
     for (int i = 1; i < F; i++) {
       subMap = getSubgraph(i);
-      componentSum += approximationComponents(subMap, epsillon / (2 * F), delta / F);
+      if(subMap.size() != 0){
+        componentSum += approximationComponents(subMap, epsillon / (2 * F), delta / F);
+      }
     }
 
     double approximation = numberOfNodes - F + componentSum;
@@ -128,133 +108,65 @@ public class MSF {
 
   public static HashMap<Integer, LinkedList<Pair>> getSubgraph(int maxEdgeWeight) {
     HashMap<Integer, LinkedList<Pair>> subMap = new HashMap<Integer, LinkedList<Pair>>();
-    // Get matrix that consists of all weights up to and including maxEdgeWeight
     Iterator<Integer> iterator = map.keySet().iterator();
-    
 
-  while(iterator.hasNext()){
-    int sourceNode = iterator.next();
-    LinkedList<Pair> tempList = map.get(sourceNode);
-      for (Pair pair: tempList) {
-        int weight = pair.getValue();
-        if (weight<= maxEdgeWeight && weight != -1){ 
-          int dstNode = pair.getKey();
-          putNode(subMap, sourceNode, dstNode, weight);
-          putNode(subMap, dstNode, sourceNode, weight);
+    while(iterator.hasNext()){
+      int sourceNode = iterator.next();
+      LinkedList<Pair> tempList = map.get(sourceNode);
+        for (Pair pair: tempList) {
+          int weight = pair.getValue();
+          if (weight<= maxEdgeWeight){ 
+            int dstNode = pair.getKey();
+            putNode(subMap, sourceNode, dstNode, weight);
+            putNode(subMap, dstNode, sourceNode, weight);
+          }
         }
       }
-    }
-
     return subMap;
   }
 
   // Does a request to a random node which has not yet been visited.
-  public static void randomRequest() {
-
-    Random rand = new Random(0);
-
-    // Get current size of visitedNodes
-    int random = rand.nextInt(numberOfNodes);
-    // Read value at random position in visitedNodes
-    //int nextValue = visitedNodes.get(random);
-
-
-    // Store visited nodes in linkedList
-    //visitedNodes.remove(random);
-
-    // System.out.println("getNode " + nextValue);
-
-    // Request node found in visitedNodes
-    // System.out.println("FROM NODE: " + nextValue);
+  public static void randomRequest(Random randomGenerator) {
+    int random = randomGenerator.nextInt(numberOfNodes);
     getNode(random);
-  }
-  
-  
-  public static int getWeight(HashMap<Integer, LinkedList<Pair>> graph, int sourceNode, int DstNode){
-  
-      if(map.containsKey(sourceNode)){
-         LinkedList<Pair> temp = graph.get(sourceNode);
-       
-        /* for(Pair keyValue: temp){
-             if(keyValue.getKey() == DstNode) return keyValue.getValue();
-         }
-*/
-        Iterator<Pair> i = temp.iterator();
-        while (i.hasNext()) {
-          Pair pointer = i.next();
-          if(pointer.getKey() == DstNode) return pointer.getValue();
-        }
-         
-      }
-      return -1;
   }
   
   // Function to add an edge with a weight between source and destination node
   public static void putNode(HashMap<Integer, LinkedList<Pair>> internalMap, int sourceNode, int DstNode, int weight) {
   
       if(internalMap.containsKey(sourceNode)){
-          
           LinkedList<Pair> temp = internalMap.get(sourceNode);
           Pair newPair = new Pair(DstNode, weight);
           temp.add(newPair); 
       }
       else {
-      
-            LinkedList<Pair> edges = new LinkedList<Pair>();
-            Pair myPair = new Pair(DstNode, weight);
-            edges.add(myPair);
-            internalMap.put(sourceNode, edges);
-
-            /* 
-            Example how to get key or value
-            Integer key = myPair.getKey();
-            String value = myPair.getValue();
-            */  
+          LinkedList<Pair> edges = new LinkedList<Pair>();
+          Pair myPair = new Pair(DstNode, weight);
+          edges.add(myPair);
+          internalMap.put(sourceNode, edges);
       }
   }
 
   // gets edges from requested node.
   public static void getNode(int originNode) {
-    // Read the answer
-
+    
     io.println(originNode);
     io.flush();
-    // Fill matrix with values from request
-    // Example: getNode(7) => 3 1 3 6 2 3 1
-
     int numberOfEdges = io.getInt();
-
-    // visitedNodes.add(originNode);
-
     int to, weight;
+
     for(int i = 0; i < numberOfEdges; i++){
       to = io.getInt();
       weight = io.getInt();
-      //System.out.println("TO: " + to);
-      //System.out.println("MATRIX DIM: " + matrix.length + "x" + matrix[0].length);
-      //matrix[originNode][to] = weight;
-      //matrix[to][originNode] = weight;
-
       putNode(map, originNode, to, weight);
       putNode(map, to, originNode, weight);
-
-      //print2D(matrix);
     }
 
   }
 
-  // Simple function to print 2D arrays, input is matrix.
-  public static void print2D(int mat[][]) {
-    // Loop through all rows
-    for (int[] row : mat)
-
-      // converting each row as string
-      // and then printing in a separate line
-      System.out.println(Arrays.toString(row));
-  }
 
   // Taken from https://www.sanfoundry.com/java-program-traverse-graph-using-bfs/
-  public static int breadthFirstSearch(HashMap<Integer, LinkedList<Pair>> subGraph, int source) {
+  public static double breadthFirstSearch(HashMap<Integer, LinkedList<Pair>> subGraph, int source) {
     //boolean[] visited = new boolean[subGraph.size()]; 
     HashMap<Integer, Boolean> hasVisited = new HashMap<Integer, Boolean>();
 
@@ -267,15 +179,15 @@ public class MSF {
       counter++;
       
       LinkedList<Pair> edges = subGraph.get(node);
-      for (Pair pair : edges)
-      {
-        if (pair.getValue() > 0 && hasVisited.get(pair.getKey()) == false) {
-          queue.add(pair.getKey());
-          hasVisited.put(pair.getKey(), true);
+      if(edges != null){
+        for (Pair pair : edges){
+          if (pair.getValue() > 0 && hasVisited.get(pair.getKey()) == null) {
+            queue.add(pair.getKey());
+            hasVisited.put(pair.getKey(), true);
+          }
         }
       }
     }
-
     return counter;
   }
 }
