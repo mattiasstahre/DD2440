@@ -23,7 +23,7 @@ public class MSF {
     maxWeight = io.getInt();
     maxQueries = io.getInt(); 
     io.flush();
-    //maxQueries = maxQueries;
+    // maxQueries = maxQueries;
 
     initialize();
 
@@ -41,7 +41,8 @@ public class MSF {
         //putNode(graph, to, from, weight);
       }
     } else {
-      nextRequest();
+      //nextRequest();
+      nextRequestBFS();
     }
 
     /*
@@ -70,11 +71,36 @@ public class MSF {
     //subgraph = new HashMap<Integer, LinkedList<Pair>>();
 
     epsillon = 0.1;
-    delta = 0.2;
+    delta = 0.3;
     F = maxWeight;
     d = 0;
   }
 
+
+  public static void nextRequestBFS()
+  {
+    int randomNode = rand.nextInt(numberOfNodes);
+    HashMap<Integer, Boolean> hasVisited = new HashMap<Integer, Boolean>();
+
+    hasVisited.put(randomNode, true);
+    Queue<Integer> queue = new LinkedList<Integer>();
+    queue.add(randomNode);
+    int counter = maxQueries;
+    while (!queue.isEmpty() && counter > 0) {
+      counter--;
+      int node = queue.poll();
+      getNode(node);
+      LinkedList<Pair> edges = graph.get(node);
+      if(edges != null){
+        for (Pair pair : edges){
+          if (pair.getValue() > 0 && hasVisited.get(pair.getKey()) == null) {
+            queue.add(pair.getKey());
+            hasVisited.put(pair.getKey(), true);
+          }
+        }
+      }
+    }
+  }
 
   // Dumb function that get next request
   public static void nextRequest() {
@@ -182,7 +208,7 @@ public class MSF {
       
       randIdx = new Random().nextInt(size);
       randomPickedElement = keyList.get(randIdx);
-      m = breadthFirstSearch(subgraph, randomPickedElement);
+      m = breadthFirstSearch(subgraph, randomPickedElement, epsillon);
 
     if ((double)m < (2.0 / epsillon)){
         double temp = 1.0 / m;
@@ -201,7 +227,7 @@ public class MSF {
 
   // Taken from https://www.sanfoundry.com/java-program-traverse-graph-using-bfs/
   // Computes number of connected nodes from source node
-  public static double breadthFirstSearch(HashMap<Integer, LinkedList<Pair>> subgraph, int source) {
+  public static double breadthFirstSearch(HashMap<Integer, LinkedList<Pair>> subgraph, int source, double epsillon) {
     // = new boolean[subGraph.size()]; 
     //HashMap<Integer, Boolean> hasVisited2 = new HashMap<Integer, Boolean>();
     hasVisited.clear();
@@ -223,6 +249,9 @@ public class MSF {
           }
         }
       }
+      if(counter >=  2.0 / epsillon)
+        return counter;
+
     }
     if(counter > 1 && source == 1){
     //  System.out.println("Source " + source + " Counter " + counter);
