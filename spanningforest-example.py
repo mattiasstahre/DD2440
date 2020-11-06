@@ -2,7 +2,7 @@
 import sys
 import random
 
-DEBUG = True # False when you submit to kattis
+DEBUG = False # False when you submit to kattis
 
 # function which queries the next set of neighbors from kattis
 if DEBUG:
@@ -22,7 +22,7 @@ else:
 	maxQueries = int(sys.stdin.readline()) # maximum number of allowed queries
 	def getNeighbors(node):
 		# ask kattis for the next node
-		print node
+		print(node)
 		sys.stdout.flush()
 		# read the answer we get from kattis
 		line = sys.stdin.readline().split()
@@ -52,5 +52,5 @@ averageEdgeWeight = 1.0 * sumOfWeights / numEdges
 weightOfSpanningTree = averageEdgeWeight * (N-1)
 
 # print the answer
-print 'end ' + str(weightOfSpanningTree)
+print('end ' + str(weightOfSpanningTree))
 sys.stdout.flush()
