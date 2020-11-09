@@ -15,7 +15,13 @@ public class MSF {
   public static LinkedList<Pair> edgesBFS;
   public static HashMap<Integer, Boolean> hasVisited;
   public static Random rand;
-  //public static HashMap<Integer, LinkedList<Pair>> subgraph;
+  public static HashMap<Integer, Boolean> hasVisitedOne;
+  public static HashMap<Integer, LinkedList<Pair>> subgraph;
+  public static LinkedList<Pair> edges;
+  public static Iterator<Integer> iteratorSubgraph;
+  public static LinkedList<Pair> tempListSub;
+  public static Set<Integer> keySetApprox;
+  public static List<Integer> keyListApprox;
 
   public static void main(String args[]) {
 
@@ -23,7 +29,8 @@ public class MSF {
     maxWeight = io.getInt();
     maxQueries = io.getInt(); 
     io.flush();
-    // maxQueries = maxQueries;
+    maxQueries = 1000; //maxQueries/2;
+    //maxWeight = maxWeight/2;
 
     initialize();
 
@@ -37,11 +44,20 @@ public class MSF {
         int weight = io.getInt();
         io.flush();
         
-        putNode(graph, from, to, weight);
-        //putNode(graph, to, from, weight);
+        putNode(1, from, to, weight);
+        //putNode(1, to, from, weight);
       }
     } else {
       //nextRequest();
+      nextRequestBFS();
+      nextRequestBFS();
+      nextRequestBFS();
+      nextRequestBFS();
+      nextRequestBFS();
+      nextRequestBFS();
+      nextRequestBFS();
+      nextRequestBFS();
+      nextRequestBFS();
       nextRequestBFS();
     }
 
@@ -68,7 +84,8 @@ public class MSF {
     edgesBFS = new LinkedList<Pair>();
     hasVisited = new HashMap<Integer, Boolean>();
     rand = new Random();
-    //subgraph = new HashMap<Integer, LinkedList<Pair>>();
+    hasVisitedOne = new HashMap<Integer, Boolean>();
+    subgraph = new HashMap<Integer, LinkedList<Pair>>();
 
     epsillon = 0.1;
     delta = 0.3;
@@ -77,25 +94,27 @@ public class MSF {
   }
 
 
-  public static void nextRequestBFS()
-  {
-    int randomNode = rand.nextInt(numberOfNodes);
-    HashMap<Integer, Boolean> hasVisited = new HashMap<Integer, Boolean>();
+  public static void nextRequestBFS(){
 
-    hasVisited.put(randomNode, true);
-    Queue<Integer> queue = new LinkedList<Integer>();
-    queue.add(randomNode);
-    int counter = maxQueries;
-    while (!queue.isEmpty() && counter > 0) {
+    int randomNode = rand.nextInt(numberOfNodes);
+    //HashMap<Integer, Boolean> hasVisitedOne = new HashMap<Integer, Boolean>();
+    hasVisitedOne.clear();
+    hasVisitedOne.put(randomNode, true);
+    Queue<Integer> queueOne = new LinkedList<Integer>();
+    queueOne.add(randomNode);
+    int counter = maxQueries/10;
+    int node;
+    while (!queueOne.isEmpty() && counter > 0) {
       counter--;
-      int node = queue.poll();
+      node = queueOne.poll();
       getNode(node);
-      LinkedList<Pair> edges = graph.get(node);
+      //edges.clear();
+      edges = graph.get(node);
       if(edges != null){
         for (Pair pair : edges){
-          if (pair.getValue() > 0 && hasVisited.get(pair.getKey()) == null) {
-            queue.add(pair.getKey());
-            hasVisited.put(pair.getKey(), true);
+          if (hasVisitedOne.get(pair.getKey()) == null) {
+            queueOne.add(pair.getKey());
+            hasVisitedOne.put(pair.getKey(), true);
           }
         }
       }
@@ -123,31 +142,43 @@ public class MSF {
     for(int i = 0; i < numberOfEdges; i++){
       to = io.getInt();
       weight = io.getInt();
-      putNode(graph, originNode, to, weight);
+      putNode(1, originNode, to, weight);
       //putNode(graph, to, originNode, weight);
     }
   }
   
   // Function to add an edge with a weight between source and destination node
-  public static void putNode(HashMap<Integer, LinkedList<Pair>> internalMap, int sourceNode, int DstNode, int weight) {
-
-    if(internalMap.containsKey(sourceNode)){
-      Pair newPair = new Pair(DstNode, weight);
-      internalMap.get(sourceNode).add(newPair); 
-    }else {
-      LinkedList<Pair> edges = new LinkedList<Pair>();
-      Pair myPair = new Pair(DstNode, weight);
-      edges.add(myPair);
-      internalMap.put(sourceNode, edges);
+  public static void putNode(int whichGraph, int sourceNode, int DstNode, int weight) {
+    if(whichGraph == 1){
+      if(graph.containsKey(sourceNode)){
+        Pair newPair = new Pair(DstNode, weight);
+        graph.get(sourceNode).add(newPair); 
+      }else {
+        LinkedList<Pair> neighbour = new LinkedList<Pair>();
+        Pair myPair = new Pair(DstNode, weight);
+        neighbour.add(myPair);
+        graph.put(sourceNode, neighbour);
+      }
+    }else{
+      if(subgraph.containsKey(sourceNode)){
+        Pair newPair = new Pair(DstNode, weight);
+        subgraph.get(sourceNode).add(newPair); 
+      }else {
+        LinkedList<Pair> neighbour = new LinkedList<Pair>();
+        Pair myPair = new Pair(DstNode, weight);
+        neighbour.add(myPair);
+        subgraph.put(sourceNode, neighbour);
+      }
     }
   }
 
   // Compute MSF
   public static double mstApporoximation() {
+    //iteratorSubgraph = graph.keySet().iterator();
     double componentSum = 0.0;
-    HashMap<Integer, LinkedList<Pair>> subgraph;
+    //HashMap<Integer, LinkedList<Pair>> subgraph;
     for (int i = 1; i < F; i++) {
-      subgraph = getSubgraph(i);
+      getSubgraph(i); // gör endast en subgrpah om vi har en ny vikt?  Vill iterera alla vikter i storleksordning?
 /*
       for (int name: subgraph.keySet()){
             //System.out.println("START " + name);
@@ -159,7 +190,7 @@ public class MSF {
       */
       
       
-        componentSum += approximationComponents(subgraph, epsillon / (2 * F), delta / F);
+        componentSum += approximationComponents(epsillon / (2 * F), delta / F);
       
     }
     double approximation = numberOfNodes - F + componentSum;
@@ -167,67 +198,72 @@ public class MSF {
   }
 
   // Create a subgraph with max weight - maxEdgeWeight
-  public static HashMap<Integer, LinkedList<Pair>> getSubgraph(int maxEdgeWeight) {
-    //subgraph.clear();
-    HashMap<Integer, LinkedList<Pair>> subgraph = new HashMap<Integer, LinkedList<Pair>>();
-    Iterator<Integer> iterator = graph.keySet().iterator();
-    LinkedList<Pair> tempList;
+  public static void getSubgraph(int maxEdgeWeight) {
+    subgraph.clear();
+    //HashMap<Integer, LinkedList<Pair>> subgraph = new HashMap<Integer, LinkedList<Pair>>();
+    iteratorSubgraph = graph.keySet().iterator();
+    //LinkedList<Pair> tempListSub;
     int weight, dstNode, sourceNode;
 
-    while(iterator.hasNext()){
-      sourceNode = iterator.next();
-      tempList = graph.get(sourceNode);
+    while(iteratorSubgraph.hasNext()){
+      sourceNode = iteratorSubgraph.next();
+      tempListSub = graph.get(sourceNode);
       subgraph.put(sourceNode, new LinkedList<Pair>());
 
-        for (Pair pair: tempList) {
+        for (Pair pair: tempListSub) {
           weight = pair.getValue();
           if (weight<= maxEdgeWeight){ 
             dstNode = pair.getKey();
-            putNode(subgraph, sourceNode, dstNode, weight);
+            putNode(2, sourceNode, dstNode, weight);
           }
         }
       }
 
-      return subgraph;
+      //return subgraph;
   }
 
+  public static int[] pickedVertices;
+  public static int k;
+  public static double m;
+  public static double sumAppx;
+  public static int randIdx;
+  public static double tempAPPX;
+  public static int randomPickedElementAPPX;
+  public static int sizeAPPX;
   // Approximate number of connected components in a subgraph 
-  public static double approximationComponents(HashMap<Integer, LinkedList<Pair>> subgraph, double newEpsillon, double newDelta) {
-    int k = (int)((double)(1.0 / (newEpsillon * newEpsillon)) * (double)Math.log(1 / newDelta));
-    int[] pickedVertices = new int[k];
-    Random random = new Random();
-    double m;
-    double sum = 0.0;
-    int randIdx;
-    int randomPickedElement;
-    Set<Integer> keySet = subgraph.keySet();
-    List<Integer> keyList = new ArrayList<>(keySet);
-    int size = keyList.size();
+  public static double approximationComponents(double newEpsillon, double newDelta) {
+    k = (int)((double)(1.0 / (newEpsillon * newEpsillon)) * (double)Math.log(1 / newDelta));
+    pickedVertices = new int[k];
+    //double m;
+    sumAppx = 0.0;
+    keySetApprox = subgraph.keySet();
+    keyListApprox = new ArrayList<>(keySetApprox);
+    sizeAPPX = keyListApprox.size();
 
     for (int i = 0; i < k; i++) {
       
-      randIdx = new Random().nextInt(size);
-      randomPickedElement = keyList.get(randIdx);
-      m = breadthFirstSearch(subgraph, randomPickedElement, epsillon);
+      randIdx = rand.nextInt(sizeAPPX);
+      randomPickedElementAPPX = keyListApprox.get(randIdx);
+      m = breadthFirstSearch(randomPickedElementAPPX, newEpsillon);
 
-    if ((double)m < (2.0 / epsillon)){
-        double temp = 1.0 / m;
-        sum = sum + temp;
+    if ((double)m < (2.0 / newEpsillon)){
+        tempAPPX = 1.0 / m;
+        sumAppx = sumAppx + tempAPPX;
     }
       else{
-        double temp = (1.0 / (2.0 / epsillon));
-        sum = sum + temp; 
+        tempAPPX = (1.0 / (2.0 / newEpsillon));
+        sumAppx = sumAppx + tempAPPX; 
       }
     }
-    sum = sum * ((double)numberOfNodes / (double)k);
+    sumAppx = sumAppx * ((double)numberOfNodes / (double)k);
     
     //System.out.println("APPROXIMATION OF NUMBER OF COMPONENTS " + sum);
-    return (int)Math.round(sum);
+    return (int)Math.round(sumAppx);
   }
 
   // Taken from https://www.sanfoundry.com/java-program-traverse-graph-using-bfs/
   // Computes number of connected nodes from source node
-  public static double breadthFirstSearch(HashMap<Integer, LinkedList<Pair>> subgraph, int source, double epsillon) {
+  public static double breadthFirstSearch(int source, double newEpsillon) {
     // = new boolean[subGraph.size()]; 
     //HashMap<Integer, Boolean> hasVisited2 = new HashMap<Integer, Boolean>();
     hasVisited.clear();
@@ -249,38 +285,14 @@ public class MSF {
           }
         }
       }
-      if(counter >=  2.0 / epsillon)
+      if(counter >=  2.0 / newEpsillon)
         return counter;
 
     }
-    if(counter > 1 && source == 1){
+    //if(counter > 1 && source == 1){
     //  System.out.println("Source " + source + " Counter " + counter);
-    } 
+    //} 
     
     return counter;
-/*
-    //boolean[] visited = new boolean[subGraph.size()]; 
-    HashMap<Integer, Boolean> hasVisited = new HashMap<Integer, Boolean>();
-
-    hasVisited.put(source, true);
-    Queue<Integer> queue = new LinkedList<Integer>();
-    queue.add(source);
-    int counter = 0;
-    while (!queue.isEmpty()) {
-      int node = queue.poll();
-      counter++;
-      
-      LinkedList<Pair> edges = subgraph.get(node);
-      if(edges != null){
-        for (Pair pair : edges){
-          if (pair.getValue() > 0 && hasVisited.get(pair.getKey()) == null) {
-            queue.add(pair.getKey());
-            hasVisited.put(pair.getKey(), true);
-          }
-        }
-      }
-    }
-
-    return counter;*/
   }
 }
