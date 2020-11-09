@@ -29,7 +29,7 @@ public class MSF {
     maxWeight = io.getInt();
     maxQueries = io.getInt(); 
     io.flush();
-    maxQueries = 1000; //maxQueries/2;
+    maxQueries = maxQueries;
     //maxWeight = maxWeight/2;
 
     initialize();
@@ -49,16 +49,9 @@ public class MSF {
       }
     } else {
       //nextRequest();
-      nextRequestBFS();
-      nextRequestBFS();
-      nextRequestBFS();
-      nextRequestBFS();
-      nextRequestBFS();
-      nextRequestBFS();
-      nextRequestBFS();
-      nextRequestBFS();
-      nextRequestBFS();
-      nextRequestBFS();
+      for(int i = 0; i < 100; i++){
+        nextRequestBFS();
+      } 
     }
 
     /*
@@ -102,7 +95,7 @@ public class MSF {
     hasVisitedOne.put(randomNode, true);
     Queue<Integer> queueOne = new LinkedList<Integer>();
     queueOne.add(randomNode);
-    int counter = maxQueries/10;
+    int counter = maxQueries/100;
     int node;
     while (!queueOne.isEmpty() && counter > 0) {
       counter--;
