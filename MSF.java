@@ -196,12 +196,12 @@ public class MSF {
       }
     }
 
-    double approximation = numberOfNodes - F * getApproximationOfTrees() + componentSum;
+    double approximation = numberOfNodes - F * getApproximationNumberOfTrees() + componentSum;
     return approximation;
   }
 
   // Returns an approximation of how many trees there's in the graph
-  public static double getApproximationOfTrees()
+  public static double getApproximationNumberOfTrees()
   {
     return 1.0;
   }
