@@ -32,9 +32,10 @@ public class MSF {
     numberOfNodes = io.getInt();
     maxWeight = io.getInt();
     maxQueries = io.getInt(); 
+  //  System.out.println("NUMBER OF NODES: " + numberOfNodes);
     io.flush();
     maxQueries = maxQueries;
-    numberOfSamples = maxQueries;
+    numberOfSamples = (int)(maxQueries / 1.0);
 
     initialize();
 
@@ -61,6 +62,8 @@ public class MSF {
     io.flush();
   }
 
+  public static int wholeComponentCount = 0;
+
   // Initialize global variables and objects 
   public static void initialize() {
     graph = new HashMap<Integer, LinkedList<Pair>>();
@@ -79,36 +82,44 @@ public class MSF {
     d = 0;
   }
 
-
+  public static int traversedNodes = 0;
   public static void nextRequestBFS(){
 
     hasVisitedOne.clear();
 
     int counter = numberOfSamples;
-    int batchSize = 100;
+    int batchSize = 10;
     int batchCounter = batchSize;
     int node;
 
     while(counter > 0)
     {
+   //   counter--;
       Queue<Integer> queueOne = new LinkedList<Integer>();
       int randomNode = rand.nextInt(numberOfNodes);
       batchCounter = batchSize;
-
+           //   System.out.println("hej");
       if(hasVisitedOne.get(randomNode) == null)
       {
         hasVisitedOne.put(randomNode, true);
         queueOne.add(randomNode);
-        while (!queueOne.isEmpty() && counter > 0 && batchCounter > 0) {
+        while ( counter > 0 && batchCounter > 0) {
+          if(queueOne.isEmpty())
+          {
+            wholeComponentCount++;
+            break;
+          }
           counter--;
           batchCounter--;
           node = queueOne.poll();
+     //     System.out.println("hej");
+         // getNodeScript(node);
           getNode(node);
           //edges.clear();
           edges = graph.get(node);
           if(edges != null){
             for (Pair pair : edges){
-              if (hasVisitedOne.get(pair.getKey()) == null) {
+              if (hasVisitedOne.get(pair.getKey()) == null && pair.getValue() < maxWeight * 0.75) {
                 queueOne.add(pair.getKey());
                 hasVisitedOne.put(pair.getKey(), true);
               }
@@ -126,6 +137,7 @@ public class MSF {
       io.flush();
       randomNode = rand.nextInt(numberOfNodes);
       getNode(randomNode);
+    //  getNodeScript(randomNode);
     }
   }
 
@@ -147,9 +159,31 @@ public class MSF {
     }
   }
 
+  public static void getNode(int originNode, HashMap<Integer, LinkedList<Pair>> tempgraph) {
+
+    io.println(originNode);
+    io.flush();
+    int numberOfEdges = io.getInt();
+    int to, weight;
+
+    putEmptyNode(originNode, tempgraph);
+    
+    for(int i = 0; i < numberOfEdges; i++){
+      to = io.getInt();
+      weight = io.getInt();
+      putNode(originNode, to, weight, tempgraph);
+      //putNode(graph, to, originNode, weight);
+    }
+  }
+
   public static void putEmptyNode(int sourceNode) {
         LinkedList<Pair> neighbour = new LinkedList<Pair>();
         graph.put(sourceNode, neighbour);
+  }
+
+  public static void putEmptyNode(int sourceNode,  HashMap<Integer, LinkedList<Pair>> tempgraph) {
+        LinkedList<Pair> neighbour = new LinkedList<Pair>();
+        tempgraph.put(sourceNode, neighbour);
   }
   
   // Function to add an edge with a weight between source and destination node
@@ -178,13 +212,28 @@ public class MSF {
     }
   }
 
+  // Function to add an edge with a weight between source and destination node
+  public static void putNode(int sourceNode, int DstNode, int weight, HashMap<Integer, LinkedList<Pair>> tempGraph) {
+    //  elementCounter[weight - 1] = elementCounter[weight - 1] + 1;
+      if(tempGraph.containsKey(sourceNode)){
+        Pair newPair = new Pair(DstNode, weight);
+        tempGraph.get(sourceNode).add(newPair); 
+      }else {
+        LinkedList<Pair> neighbour = new LinkedList<Pair>();
+        Pair myPair = new Pair(DstNode, weight);
+        neighbour.add(myPair);
+        tempGraph.put(sourceNode, neighbour);
+      }
+  }
+
   // Compute MSF
   public static double mstApporoximation() {
     double componentSum = 0.0;
     double prevComponentSum = 0.0;
+
     for (int i = 1; i < F; i++) {
       getSubgraph(i); // gör endast en subgrpah om vi har en ny vikt?  Vill iterera alla vikter i storleksordning?
-
+   //   System.out.println("hejsan " + i);
       if(elementCounter[i - 1] == 0 && i != 1)
       {
         componentSum += prevComponentSum;
@@ -196,14 +245,17 @@ public class MSF {
       }
     }
 
-    double approximation = numberOfNodes - F * getApproximationNumberOfTrees() + componentSum;
+    double approximation = numberOfNodes + componentSum - F * getApproximationNumberOfTrees();
     return approximation;
   }
 
   // Returns an approximation of how many trees there's in the graph
+ // public static int queriesLeft;
   public static double getApproximationNumberOfTrees()
   {
-    return 1.0;
+    getSubgraph(F);
+
+    return approximationComponents(epsillon / (2 * F), delta / F);
   }
 
 
@@ -242,6 +294,7 @@ public class MSF {
     pickedVertices = new int[k];
     sumAppx = 0.0;
     keySetApprox = subgraph.keySet();
+   // System.out.println("keyset: " + keyListApprox);
     keyListApprox = new ArrayList<>(keySetApprox);
     sizeAPPX = keyListApprox.size();
 
