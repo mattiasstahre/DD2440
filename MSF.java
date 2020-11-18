@@ -94,11 +94,10 @@ public class MSF {
 
     while(counter > 0)
     {
-   //   counter--;
+      counter--;
       Queue<Integer> queueOne = new LinkedList<Integer>();
       int randomNode = rand.nextInt(numberOfNodes);
       batchCounter = batchSize;
-           //   System.out.println("hej");
       if(hasVisitedOne.get(randomNode) == null)
       {
         hasVisitedOne.put(randomNode, true);
@@ -112,8 +111,6 @@ public class MSF {
           counter--;
           batchCounter--;
           node = queueOne.poll();
-     //     System.out.println("hej");
-         // getNodeScript(node);
           getNode(node);
           //edges.clear();
           edges = graph.get(node);
@@ -137,7 +134,6 @@ public class MSF {
       io.flush();
       randomNode = rand.nextInt(numberOfNodes);
       getNode(randomNode);
-    //  getNodeScript(randomNode);
     }
   }
 
@@ -155,7 +151,6 @@ public class MSF {
       to = io.getInt();
       weight = io.getInt();
       putNode(1, originNode, to, weight);
-      //putNode(graph, to, originNode, weight);
     }
   }
 
