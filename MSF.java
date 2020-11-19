@@ -34,7 +34,7 @@ public class MSF {
     maxQueries = io.getInt(); 
     io.flush();
 
-    rand = new Random();
+    rand = new Random(10000);
 
     epsillon = 0.1;
     F = maxWeight;
@@ -126,7 +126,7 @@ public class MSF {
     hasVisited.put(source, true);
     queue.add(source);
     
-    int MAX_SEARCH = 900;
+    int MAX_SEARCH = 154;
     int treeSize = 0;
 
     while (!queue.isEmpty() && treeSize < MAX_SEARCH) {
