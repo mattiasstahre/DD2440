@@ -23,6 +23,7 @@ public class MSF {
     initialize();
 
     double approximation = mstApporoximation();
+    approximation = approximation*1.005;
     io.println("end " + approximation); 
     io.flush();
   }
